@@ -6,10 +6,9 @@
         class="dragArea list-group"
         :list="list1"
         :group="{ name: 'people', pull: 'clone', put: false }"
-        :clone="cloneList1"
-        @start="onStartList1"
-        @end="onEndList1"
-        @change="list1Change">
+        :sort="false"
+        :filter="'.added'",
+        :clone="cloneList1">
         <div class="list-group-item"
              :class="[element.level==1?'level-1':(element.level==2?'level-2':'level-3'),element.added?'added':'']"
              v-for="element in list1"
@@ -60,7 +59,10 @@
         isLoad:false,
         startList1:[],
         currentList2:[],
-        currentList1Item:{}
+        currentList1Item:{},
+        moveList2:[],
+        moveList2Start:[],
+        moveList2End:[]
       }
     },
     created(){
@@ -101,17 +103,6 @@
         }
         console.log("本课时已存在！！");
       },
-      onStartList1(){
-        this.startList1 = this.list1.concat([]);
-      },
-      onEndList1(){},
-      list1Change(obj){
-        console.log(obj);
-        let objItem = obj.moved;
-        if(objItem.newIndex != objItem.oldIndex){
-          this.list1 = this.startList1.concat([]);
-        }
-      },
       onStartList2(){
         this.currentList2 = this.list2.concat([]);
       },
@@ -123,10 +114,11 @@
             if(objItem.element.level == 1 && objItem.newIndex < this.list2.length-1
               && this.list2[objItem.newIndex+1].level == 3){
               this.list2 = this.currentList2.concat([]);
+              this.currentList1Item={};
             }else if(objItem.element.level == 3 && this.list2[objItem.newIndex-1].level == 1){
               this.list2 = this.currentList2.concat([]);
+              this.currentList1Item={};
             }
-            this.currentList1Item={};
           }
           this.$set(this.currentList1Item,'added',true);
         }else if(obj.moved){
@@ -135,9 +127,11 @@
             this.list2 = this.currentList2.concat([]);
           }else if(objItem.element.level == 3 && this.list2[objItem.newIndex-1].level == 1){
             this.list2 = this.currentList2.concat([]);
+          }else if(objItem.element.level == 1 && objItem.newIndex < this.list2.length-1
+            && this.list2[objItem.newIndex+1].level == 3){
+            this.list2 = this.currentList2.concat([]);
           }
         }
-
       }
     },
   }
