@@ -61,8 +61,7 @@
         currentList2:[],
         currentList1Item:{},
         moveList2:[],
-        moveList2Start:[],
-        moveList2End:[]
+        moveNum:0
       }
     },
     created(){
@@ -103,8 +102,37 @@
         }
         console.log("本课时已存在！！");
       },
-      onStartList2(){
+      onStartList2(item){
         this.currentList2 = this.list2.concat([]);
+        let index = item.oldIndex;
+        if(index>=0){
+          let obj = this.list2[index];
+          if(obj.level==1){
+            for(let i = index+1;i<this.list2.length;i++){
+              if(this.list2[i].level==1){
+                // this.moveList2 = this.list2.slice(index,i);
+                // this.moveList2Start = this.list2.slice(0,index-1);
+                // this.moveList2End = this.list2.slice(i+1,this.list2.length-1);
+                // console.log(this.moveList2);
+                console.log(i+"==========");
+                this.moveList2 = i-index+1;
+                return;
+              }
+            }
+          }else if(obj.level==2){
+            for(let i = index+1;i<this.list2.length;i++){
+              if(this.list2[i].level==1||this.list2[i].level==2){
+                // this.moveList2 = this.list2.slice(index,i);
+                // this.moveList2Start = this.list2.slice(0,index-1);
+                // this.moveList2End = this.list2.slice(i+1,this.list2.length-1);
+                // console.log(this.moveList2);
+                console.log(i+"***************");
+                this.moveList2 = i-index+1;
+                return;
+              }
+            }
+          }
+        }
       },
       list2Change(obj){
         let objItem;
@@ -130,6 +158,21 @@
           }else if(objItem.element.level == 1 && objItem.newIndex < this.list2.length-1
             && this.list2[objItem.newIndex+1].level == 3){
             this.list2 = this.currentList2.concat([]);
+          }
+          if(objItem.element.level == 1){
+            // this.list2 =this.moveList2Start.concat(this.moveList2).concat(this.moveList2End);
+            let arr1 = this.currentList2.slice(0,objItem.newIndex);
+
+            let arr2 = this.currentList2.slice(objItem.oldIndex,objItem.oldIndex+this.moveNum);
+
+            let arr3 = this.currentList2.slice(objItem.oldIndex+this.moveNum);
+
+          }else if(objItem.element.level == 2){
+            // this.list2 =this.moveList2Start.concat(this.moveList2).concat(this.moveList2End);
+            let arr1 = this.currentList2.slice(0,objItem.oldIndex);
+            let arr2 = this.currentList2.slice(objItem.oldIndex,objItem.oldIndex+this.moveNum);
+            let arr3 = this.currentList2.slice(objItem.oldIndex+this.moveNum);
+            this.list2 = arr1.concat(arr2).concat(arr3);
           }
         }
       }
