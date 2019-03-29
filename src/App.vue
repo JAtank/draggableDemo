@@ -7,11 +7,11 @@
         :list="list1"
         :group="{ name: 'people', pull: 'clone', put: false }"
         :clone="cloneList1"
-        @start="onStart"
-        @end="onEnd"
+        @start="onStartList1"
+        @end="onEndList1"
         @change="list1Change">
         <div class="list-group-item"
-             :class="[element.level==1?'level-1':(element.level==2?'level-2':'level-3')]"
+             :class="[element.level==1?'level-1':(element.level==2?'level-2':'level-3'),element.added?'added':'']"
              v-for="element in list1"
              :key="element.c_id">
           {{ element.name }}
@@ -25,6 +25,7 @@
         class="dragArea list-group"
         :list="list2"
         group="people"
+        @start="onStartList2"
         @change="list2Change">
         <div class="list-group-item"
              :class="[element.level==1?'level-1':(element.level==2?'level-2':'level-3')]"
@@ -58,7 +59,8 @@
         list2: [],
         isLoad:false,
         startList1:[],
-        currentList2:[]
+        currentList2:[],
+        currentList1Item:{}
       }
     },
     created(){
@@ -74,6 +76,7 @@
         }else {
           let j;
           for(let i = 0;i<list.length;i++){
+            this.$set(list[i],'added',false);
             if(list[i].c_p_id==0){
               j = i;
               this.$set(list[i],'level',1);
@@ -93,38 +96,48 @@
           return;
         }else if(this.list2.indexOf(item)==-1){
           this.currentList2 = this.list2.concat([]);
+          this.currentList1Item = item;
           return item;
         }
         console.log("本课时已存在！！");
       },
-      onStart(){
-        // this.currentList2 = this.list2;
-        // console.log("开始");
-        // console.log(a);
+      onStartList1(){
+        this.startList1 = this.list1.concat([]);
       },
-      onEnd(){
-        // console.log()
-        // if(this.list2 == this.currentList2){
-        //   console.log("同一个列")
-        //   return;
-        // }
-      },
+      onEndList1(){},
       list1Change(obj){
         console.log(obj);
-        if(obj.newIndex != obj.oldIndex){
+        let objItem = obj.moved;
+        if(objItem.newIndex != objItem.oldIndex){
           this.list1 = this.startList1.concat([]);
         }
       },
+      onStartList2(){
+        this.currentList2 = this.list2.concat([]);
+      },
       list2Change(obj){
-        let objItem = obj.added;
-        console.log(objItem);
-        if(objItem.element.level && this.list2.length>1){
-          if(objItem.element.level==1 && this.list2[objItem.newIndex+1].level==3){
+        let objItem;
+        if(obj.added){
+          objItem = obj.added;
+          if(objItem.element.level && this.list2.length>1){
+            if(objItem.element.level == 1 && objItem.newIndex < this.list2.length-1
+              && this.list2[objItem.newIndex+1].level == 3){
+              this.list2 = this.currentList2.concat([]);
+            }else if(objItem.element.level == 3 && this.list2[objItem.newIndex-1].level == 1){
+              this.list2 = this.currentList2.concat([]);
+            }
+            this.currentList1Item={};
+          }
+          this.$set(this.currentList1Item,'added',true);
+        }else if(obj.moved){
+          objItem = obj.moved;
+          if(objItem.element.level!=1 && objItem.newIndex == 0){
             this.list2 = this.currentList2.concat([]);
           }else if(objItem.element.level == 3 && this.list2[objItem.newIndex-1].level == 1){
             this.list2 = this.currentList2.concat([]);
           }
         }
+
       }
     },
   }
@@ -171,6 +184,9 @@
     &.level-3{
       padding-left: 7%;
     }
+  }
+  .added{
+    color: #999;
   }
 }
 </style>
