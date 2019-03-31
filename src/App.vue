@@ -188,7 +188,6 @@
             this.list2.push(item);
             this.$set(item,'added',true);
           }else{
-            console.log("2222");
             this.list2.push(moveItem_2);
             this.list2.push(item);
             this.$set(moveItem_2,'added',true);
@@ -279,6 +278,9 @@
         let currentIndex =  this.list2LevelIndexList.indexOf(index);
         if(currentIndex!=this.list2LevelIndexList.length-1){ //不是最后一个
           let nextIndex = currentIndex+1;
+          let changeAddedList = this.list2.slice(index,this.list2LevelIndexList[nextIndex]);
+          console.log(changeAddedList);
+          this.cancelAdded(changeAddedList,this.list1);
           this.list2.splice(index,this.list2LevelIndexList[nextIndex]-index);
           let num = this.list2LevelIndexList[nextIndex]-this.list2LevelIndexList[currentIndex];
           for (let i=nextIndex;i<this.list2LevelIndexList.length;i++){
@@ -286,12 +288,12 @@
             this.$set(this.list2LevelIndexList,i,newIndex);
           }
         }else { //最后一个
-          console.log(index+";"+this.list2.length-index);
+          let changeAddedList = this.list2.slice(index);
+          console.log(changeAddedList);
+          this.cancelAdded(changeAddedList,this.list1);
           this.list2.splice(index,this.list2.length-index);
-          // this.setAdded(this.list1,index,this.list1.length);
         }
         this.list2LevelIndexList.splice(currentIndex,1);
-        console.log(this.list2LevelIndexList);
       },
       lookItem(c_id){
        let item =  this.list1.find((item)=>{
@@ -313,6 +315,16 @@
         for (let i=startIndex;i<endIndex;i++){
           this.$set(list[i],"added",true);
         };
+      },
+      cancelAdded(list2,list1){
+          for (let i=0;i<list2.length;i++){
+            for(let j=0;j<list1.length;j++){
+                if(list2[i].c_id == list1[j].c_id){
+                    this.$set(list1[j],'added',false);
+                    break;
+                }
+            }
+          }
       }
       // cloneList1(item){
       //   if(!this.list2.length&&item.level!=1){
